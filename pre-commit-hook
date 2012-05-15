@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Assumptions:
+#
+#    Puppet >= 2.7 is installed on this machine
+#    puppet-lint is installed on this machine
+#    Adjust LINTFLAGS as appropriate
+
+# Redirect output to stderr.
+exec 1>&2
+
+TMPFILE=$(mktemp)
+STATUS=0
+
+trap 'rm -rf $TMPFILE' EXIT INT HUP
+
+IFS="
+"
+
+if git rev-parse --quiet --verify HEAD > /dev/null
+then
+    revision=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    revision=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# get a list of files changed in this transaction
+declare -a FILES
+FILES=$(git diff --cached --name-only --diff-filter=ACM "${revision}")
+
+for file in ${FILES[@]}
+do
+
+    # Don't check empty files
+    if [ $(git cat-file -s ":0:${file}") -eq 0 ] ; then
+        exit $STATUS
+    fi
+
+    extension="${file##*.}"
+    git cat-file blob ":0:${file}" > $TMPFILE
+    if [ $? -ne 0 ] ; then
+        echo "Unable to checkout $file" >&2
+        STATUS=2
+    else
+        case "$extension" in
+            pp)
+		# check for Puppet binary
+		which puppet >/dev/null 2>&1 || exit $STATUS
+
+                # puppet syntax check
+                puppet parser validate $TMPFILE >/dev/null 2>&1
+                if [ $? -ne 0 ] ; then
+                    echo "Puppet syntax error in ${file}. Run 'puppet parser validate ${file}'" >&2
+                    STATUS=2
+                fi
+
+		# check for puppet-lint
+		which puppet-lint >/dev/null 2>&1 || exit $STATUS
+
+                # puppet-lint check the manifest
+                puppet-lint --fail-on-warnings --with-filename --log-format "${file}:%{linenumber} %{KIND} - %{message}" $TMPFILE 2> /dev/null
+                if [ $? -ne 0 ] ; then
+                    STATUS=2
+                fi
+            ;;
+    
+            erb)
+		# check for erb
+		which erb >/dev/null 2>&1 || exit $STATUS
+
+                # syntax check templates - this doesn't catch a lot of mistakes,
+                # but it should catch gross mistakes
+                erb -x -T - "$TMPFILE" | ruby -c > /dev/null 2>&1
+                if [ $? -ne 0 ] ; then
+                    echo "ERB syntax error in $file" >&2
+                    STATUS=2
+                fi
+            ;;
+        esac
+    fi
+done
+
+exit $STATUS
