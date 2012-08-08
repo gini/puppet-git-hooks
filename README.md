@@ -22,6 +22,12 @@ that the manifests conform to the [Puppet Labs style guide](http://docs.puppetla
 and that templates (\*.erb) have valid syntax.
 
 
+Continuous Integration
+----------------------
+
+[![Build Status](https://secure.travis-ci.org/smarchive/puppet-git-hooks.png)](http://travis-ci.org/smarchive/puppet-git-hooks)
+
+
 License
 -------
 Copyright (c) 2012 smarchive GmbH
