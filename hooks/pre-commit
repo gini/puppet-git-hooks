@@ -10,6 +10,7 @@
 # Redirect output to stderr.
 exec 1>&2
 
+PUPPETLINT_FLAGS=${PUPPETLINT_FLAGS:-"--no-autoloader_layout-check --no-80chars-check"}
 TMPFILE=$(mktemp)
 STATUS=0
 
@@ -35,7 +36,7 @@ else
 fi
 
 IFS="
-"
+ "
 
 # Get a list of files changed in this transaction
 declare -a FILES
@@ -65,7 +66,7 @@ do
                 fi
 
                 # puppet-lint check
-                puppet-lint --with-filename --log-format "${file}:%{linenumber} %{KIND} - %{message}" $TMPFILE 2> /dev/null
+                puppet-lint $PUPPETLINT_FLAGS --log-format "${file}:%{linenumber} %{KIND} - %{message}" $TMPFILE 2> /dev/null
                 if [[ $? -ne 0 ]] ; then
                     STATUS=2
                 fi
