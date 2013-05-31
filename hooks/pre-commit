@@ -5,6 +5,8 @@
 #    Puppet >= 2.7 is installed on this machine
 #    puppet-lint is installed on this machine
 #    ERB is installed on this machine
+#    git is installed on this machine
+#    sed is installed on this machine
 #    Adjust LINTFLAGS as appropriate
 
 # Redirect output to stderr.
@@ -58,6 +60,9 @@ do
     else
         case $extension in
             pp)
+                # Remove import lines while parsing
+                # http://projects.puppetlabs.com/issues/9670#note-14
+                sed -i -e '/^import / d' $TMPFILE >/dev/null 2>&1
                 # Puppet syntax check
                 puppet parser validate $TMPFILE >/dev/null 2>&1
                 if [[ $? -ne 0 ]]; then
@@ -86,3 +91,4 @@ do
 done
 
 exit $STATUS
+
