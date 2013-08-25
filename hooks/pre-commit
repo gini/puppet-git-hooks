@@ -85,9 +85,17 @@ do
             erb)
                 # syntax check templates - this doesn't catch a lot of mistakes,
                 # but it should catch gross mistakes
-                erb -x -T - "${TMPFILE}" | ruby -c > /dev/null 2>&1
+                erb -x -T - "${TMPFILE}" | ruby -c >/dev/null 2>&1
                 if [[ $? -ne 0 ]]; then
                     echo "ERB syntax error in ${file}" >&2
+                    STATUS=2
+                fi
+            ;;
+            yml|yaml)
+                # syntax YAML files, https://ttboj.wordpress.com/2013/08/25/finding-yaml-errors-in-puppet/
+                ruby -ryaml -e "YAML.parse(File.open('${TMPFILE}'))" >/dev/null 2>&1
+                if [[ $? -ne 0 ]]; then
+                    echo "YAML syntax error in ${file}" >&2
                     STATUS=2
                 fi
             ;;
@@ -96,4 +104,3 @@ do
 done
 
 exit $STATUS
-
