@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Assumptions:
+# External requirements:
 #
-#    Puppet >= 2.7 is installed on this machine
-#    puppet-lint is installed on this machine
-#    ERB is installed on this machine
-#    git is installed on this machine
-#    sed is installed on this machine
+#    * Git
+#    * sed
+#    * Ruby with ERB and YAML support
+#    * Puppet >= 2.7
+#    * puppet-lint
+#
 #    Adjust LINTFLAGS as appropriate
 
 # Redirect output to stderr.
@@ -18,6 +19,9 @@ STATUS=0
 
 # Register exit trap for removing temporary files
 trap 'rm -rf $TMPFILE' EXIT INT HUP
+
+# Check for ruby binary
+which ruby >/dev/null 2>&1 || exit 1
 
 # Check for Puppet binary
 which puppet >/dev/null 2>&1 || exit 1
