@@ -13,8 +13,9 @@
 # Redirect output to stderr.
 exec 1>&2
 
-PUPPETLINT_FLAGS=${PUPPETLINT_FLAGS:-"--no-autoloader_layout-check --no-80chars-check"}
-TMPFILE=$(mktemp /tmp/tmp.XXXXXXXXXX)
+PUPPETLINT_FLAGS=${PUPPETLINT_FLAGS:-'--no-autoloader_layout-check --no-80chars-check'}
+TMPDIR=${TMPDIR:-'/tmp'}
+TMPFILE=$(mktemp "${TMPDIR}"/tmp.XXXXXXXXXX)
 STATUS=0
 
 # Register exit trap for removing temporary files
