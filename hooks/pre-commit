@@ -99,6 +99,14 @@ do
                     STATUS=2
                 fi
             ;;
+            json)
+                # syntax YAML files, https://ttboj.wordpress.com/2013/08/25/finding-yaml-errors-in-puppet/
+                ruby -rjson -e "JSON.parse(File.open('${TMPFILE}').read)" >/dev/null 2>&1
+                if [[ $? -ne 0 ]]; then
+                    echo "JSON syntax error in ${file}" >&2
+                    STATUS=2
+                fi
+            ;;
         esac
     fi
 done
