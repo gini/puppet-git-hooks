@@ -35,9 +35,6 @@ which puppet-lint >/dev/null 2>&1 || exit 1
 # Check for erb
 which erb >/dev/null 2>&1 || exit 1
 
-# Check for r10k
-which r10k >/dev/null 2>&1 || exit 1
-
 # Get correct git revision
 if git rev-parse --quiet --verify HEAD > /dev/null
 then
@@ -86,7 +83,7 @@ do
                     STATUS=2
                 fi
             ;;
-    
+
             erb)
                 # syntax check templates - this doesn't catch a lot of mistakes,
                 # but it should catch gross mistakes
@@ -113,14 +110,18 @@ do
                 fi
             ;;
         esac
+
         # r10k Puppetfile syntax
-        if [ "`basename $file`" == 'Puppetfile' ]; then
-            cp "${TMPFILE}" "${TMPR10K}/Puppetfile"
-            ( cd "${TMPR10K}" && r10k puppetfile check ) 2> "${TMPFILE}"
-            if [[ $? -ne 0 ]]; then
-                echo "r10k syntax error in ${file}" >&2
-                sed "s,${TMPR10K}/Puppetfile,${file}," >&2 < "${TMPFILE}"
-                STATUS=2
+        which r10k >/dev/null 2>&1
+        if [[ $? -eq 0 ]]; then
+            if [[ "$(basename $file)" == 'Puppetfile' ]]; then
+                cp "${TMPFILE}" "${TMPR10K}/Puppetfile"
+                ( cd "${TMPR10K}" && r10k puppetfile check ) 2> "${TMPFILE}"
+                if [[ $? -ne 0 ]]; then
+                    echo "r10k syntax error in ${file}" >&2
+                    sed "s,${TMPR10K}/Puppetfile,${file}," >&2 < "${TMPFILE}"
+                    STATUS=2
+                fi
             fi
         fi
     fi
