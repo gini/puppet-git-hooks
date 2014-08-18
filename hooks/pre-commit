@@ -35,7 +35,7 @@ which puppet-lint >/dev/null 2>&1 || exit 1
 # Check for erb
 which erb >/dev/null 2>&1 || exit 1
 
-# Check for erb
+# Check for r10k
 which r10k >/dev/null 2>&1 || exit 1
 
 # Get correct git revision
