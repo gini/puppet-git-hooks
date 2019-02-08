@@ -78,7 +78,7 @@ do
                 fi
 
                 # puppet-lint check
-                puppet-lint $PUPPETLINT_FLAGS --log-format "${file}:%{linenumber} %{KIND} - %{message}" $TMPFILE 2> /dev/null
+                puppet-lint $PUPPETLINT_FLAGS --log-format "${file}:%{line} %{KIND} - %{message}" $TMPFILE 2> /dev/null
                 if [[ $? -ne 0 ]] ; then
                     STATUS=2
                 fi
